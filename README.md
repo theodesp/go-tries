@@ -25,8 +25,19 @@ b.Add("dog", 2)
 b.Add("dog and", 3)
 b.Add("dog and cat", 4)
 
-b.Get("Cat") // false
-b.Get("cat") // true
+b.Get("Cat") // nil
+b.Get("cat") // cat
+```
+
+Benchmarks
+---
+
+```bash
+BenchmarkSimpleTriePutStringKey-4       30000000                38.4 ns/op             8 B/op          1 allocs/op
+BenchmarkSimpleTrieGetStringKey-4       100000000               13.0 ns/op             0 B/op          0 allocs/op
+BenchmarkSimpleTriePutPhraseKey-4       10000000               122 ns/op               8 B/op          1 allocs/op
+BenchmarkSimpleTrieGetPhraseKey-4         20000000                97.4 ns/op             0 B/op          0 allocs/op
+
 ```
 
 License

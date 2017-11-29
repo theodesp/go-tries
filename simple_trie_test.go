@@ -92,7 +92,7 @@ func BenchmarkSimpleTrieGetStringKey(b *testing.B) {
 	}
 }
 
-// path keys
+// Phrase keys
 
 func BenchmarkSimpleTriePutPhraseKey(b *testing.B) {
 	trie := NewSimpleTrie()
@@ -103,7 +103,7 @@ func BenchmarkSimpleTriePutPhraseKey(b *testing.B) {
 	}
 }
 
-func BenchmarkSimpleTrieGetPathKey(b *testing.B) {
+func BenchmarkSimpleTrieGetPhraseKey(b *testing.B) {
 	trie := NewSimpleTrie()
 	for i := 0; i < b.N; i++ {
 		trie.Add(phrases[i%len(phrases)], i)
