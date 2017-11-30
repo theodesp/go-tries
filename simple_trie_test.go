@@ -52,7 +52,7 @@ func TestNilCases(t *testing.T)  {
 		{"caterpillar", 4},
 		{"cat gideon", 5},
 		{"cat giddy", 6},
-		{"cat maker", 7},
+		{"cat maker dog", 7},
 	}
 
 	// subsequent put

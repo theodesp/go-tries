@@ -16,17 +16,19 @@ func NextWord(key string, start int, sep rune) (segment string, nextIndex int) {
 	if len(key) == 0 || start < 0 || start > len(key)-1 {
 		return "", -1
 	}
-	end := strings.IndexRune(key[start+1:], sep) // next sep after 0th rune
+	end := strings.IndexRune(key[start:], sep) // next sep after 0th rune
 	if end == -1 {
 		return key[start:], -1
 	}
 	return key[start: start+end+1], start + end + 1
 }
 
+
 // NewSimpleTrie allocates and returns a new *SimpleTrie.
 func NewSimpleTrie() *SimpleTrie {
 	return &SimpleTrie{
 		children: make(map[string]*SimpleTrie),
+
 	}
 }
 
@@ -50,6 +52,7 @@ func (trie *SimpleTrie) Get(key string) interface{} {
 func (trie *SimpleTrie) Add(key string, value int) bool {
 	node := trie
 	for part, i := NextWord(key, 0, ' '); ; part, i = NextWord(key, i, ' ') {
+
 		child, _ := node.children[part]
 
 		if child == nil {

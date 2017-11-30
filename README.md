@@ -19,19 +19,19 @@ Trie Types
 
 ```go
 t := NewSimpleTrie()
-b.Add("cat", 0)
-b.Add("fox", 1)
-b.Add("dog", 2)
-b.Add("dog and", 3)
-b.Add("dog and cat", 4)
+t.Add("cat", 0)
+t.Add("fox", 1)
+t.Add("dog", 2)
+t.Add("dog and", 3)
+t.Add("dog and cat", 4)
 
-b.Get("Cat") // nil
-b.Get("cat") // cat
+t.Get("Cat") // nil
+t.Get("cat") // cat
 ```
 
 Benchmarks
 ---
-
+Single threaded benchmarks
 ```bash
 BenchmarkSimpleTriePutStringKey-4       30000000                38.4 ns/op             8 B/op          1 allocs/op
 BenchmarkSimpleTrieGetStringKey-4       100000000               13.0 ns/op             0 B/op          0 allocs/op
