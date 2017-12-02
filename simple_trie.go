@@ -1,9 +1,5 @@
 package go_tries
 
-import (
-	"strings"
-)
-
 type SimpleTrie struct {
 	// Reference to children
 	children map[string]*SimpleTrie
@@ -11,24 +7,12 @@ type SimpleTrie struct {
 	value interface{}
 }
 
-// Get Next word from a key, a starting index and a path separator
-func NextWord(key string, start int, sep rune) (segment string, nextIndex int) {
-	if len(key) == 0 || start < 0 || start > len(key)-1 {
-		return "", -1
-	}
-	end := strings.IndexRune(key[start:], sep) // next sep after 0th rune
-	if end == -1 {
-		return key[start:], -1
-	}
-	return key[start: start+end+1], start + end + 1
-}
 
 
 // NewSimpleTrie allocates and returns a new *SimpleTrie.
 func NewSimpleTrie() *SimpleTrie {
 	return &SimpleTrie{
 		children: make(map[string]*SimpleTrie),
-
 	}
 }
 
@@ -36,12 +20,12 @@ func NewSimpleTrie() *SimpleTrie {
 // nodes or for nodes with a value of nil.
 func (trie *SimpleTrie) Get(key string) interface{} {
 	node := trie
-	for part, i := NextWord(key, 0, ' '); ; part, i = NextWord(key, i, ' ') {
-		node = node.children[part]
+	for part, rest := SplitPath(key, " "); ; part, rest = SplitPath(rest, " "){
+	    node = node.children[part]
 		if node == nil {
 			return nil
 		}
-		if i == -1 {
+		if rest == "" {
 			break
 		}
 
@@ -51,8 +35,7 @@ func (trie *SimpleTrie) Get(key string) interface{} {
 
 func (trie *SimpleTrie) Add(key string, value int) bool {
 	node := trie
-	for part, i := NextWord(key, 0, ' '); ; part, i = NextWord(key, i, ' ') {
-
+	for part, rest := SplitPath(key, " "); ; part, rest = SplitPath(rest, " "){
 		child, _ := node.children[part]
 
 		if child == nil {
@@ -61,7 +44,7 @@ func (trie *SimpleTrie) Add(key string, value int) bool {
 		}
 
 		node = child
-		if i == -1 {
+		if rest == "" {
 			break
 		}
 
@@ -82,14 +65,14 @@ type nodeStr struct {
 func (trie *SimpleTrie) Delete(key string) bool {
 	var path []nodeStr // record ancestors to check later
 	node := trie
-	for part, i := NextWord(key, 0, ' '); ; part, i = NextWord(key, i, ' ') {
-		path = append(path, nodeStr{part: part, node: node})
+	for part, rest := SplitPath(key, " "); ; part, rest = SplitPath(rest, " "){
+	    path = append(path, nodeStr{part: part, node: node})
 		node = node.children[part]
 		if node == nil {
 			// node does not exist
 			return false
 		}
-		if i == -1 {
+		if rest == "" {
 			break
 		}
 	}

@@ -29,15 +29,18 @@ t.Get("Cat") // nil
 t.Get("cat") // cat
 ```
 
+**DoubleArrayTrie**: A more complex implementation of a Trie using 2 Lists. 
+This is supposed to have better search performance in expense of slower insertions.
+Based on the [Sato and Morimoto paper](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.14.8665&rep=rep1&type=pdf)
+
 Benchmarks
 ---
 Single threaded benchmarks
 ```bash
-BenchmarkSimpleTriePutStringKey-4       30000000                38.4 ns/op             8 B/op          1 allocs/op
-BenchmarkSimpleTrieGetStringKey-4       100000000               13.0 ns/op             0 B/op          0 allocs/op
-BenchmarkSimpleTriePutPhraseKey-4       10000000               122 ns/op               8 B/op          1 allocs/op
-BenchmarkSimpleTrieGetPhraseKey-4         20000000                97.4 ns/op             0 B/op          0 allocs/op
-
+BenchmarkSimpleTriePutStringKey-4       50000000                35.6 ns/op             8 B/op          1 allocs/op
+BenchmarkSimpleTrieGetStringKey-4       100000000               16.0 ns/op             0 B/op          0 allocs/op
+BenchmarkSimpleTriePutPhraseKey-4       20000000                69.5 ns/op             8 B/op          1 allocs/op
+BenchmarkSimpleTrieGetPhraseKey-4       30000000                42.1 ns/op             0 B/op          0 allocs/op
 ```
 
 License
