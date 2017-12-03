@@ -7,8 +7,6 @@ type SimpleTrie struct {
 	value interface{}
 }
 
-
-
 // NewSimpleTrie allocates and returns a new *SimpleTrie.
 func NewSimpleTrie() *SimpleTrie {
 	return &SimpleTrie{

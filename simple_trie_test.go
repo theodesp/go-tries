@@ -1,6 +1,5 @@
 package go_tries
 
-
 import (
 	"crypto/rand"
 	"testing"

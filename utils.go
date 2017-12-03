@@ -45,3 +45,24 @@ func SplitPath(path string, sep string) (string, string) {
 	}
 	return path, ""
 }
+
+// Grows int slice with cap
+func growSlice(slice []int, newCap int) []int {
+	if cap(slice) >= newCap {
+		return slice
+	}
+
+	return append(slice, make([]int, newCap)...)
+}
+
+// Ensures slice pos is reachable by growing the slice capacity
+func EnsureIndex(s[]int, pos int) []int  {
+	for {
+		if pos > cap(s) {
+			s = growSlice(s, cap(s) + growInc)
+		} else {
+			break
+		}
+	}
+	return s
+}
