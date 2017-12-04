@@ -2,6 +2,7 @@ package go_tries
 
 import (
 	"testing"
+	"fmt"
 )
 
 func TestInitTail(t *testing.T) {
@@ -90,6 +91,23 @@ func TestGetKeyExistsInTrie(t *testing.T) {
 
 	if d.Get("baby") != true {
 		t.Errorf("expected search for key %v to be %v, got %v", "babe", true, false)
+	}
+}
+
+func TestGetKeyDeleteInTrie(t *testing.T) {
+	d := NewDoubleArrayTrie()
+	d.setCheck(3, 1)
+	d.setBase(3, 1)
+	d.setCheck(2, 3)
+	d.setBase(2, -1)
+	d.WriteTail("aby#", 0)
+
+	if d.Delete("baby") != true {
+		t.Errorf("expected delete for key %v to be %v, got %v", "babe", true, false)
+	}
+
+	if d.Get("baby") != false {
+		t.Errorf("expected search for key %v to be %v, got %v", "babe", false, true)
 	}
 }
 
