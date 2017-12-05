@@ -161,11 +161,8 @@ func (d *DoubleArrayTrie) Add(key string) bool {
 				//d.relocateBase(s, t, key, idx)
 			} else {
 				// Case 1. Empty string or without conflicts. Just insert at tail
-				//d.separate(key, s, idx)
-				d.setBase(t, -d.tailPos)
-				d.setCheck(t, s)
-				d.WriteTail(key[idx + 1:] + boundary, d.tailPos)
-			}
+				d.separate(key, idx, s, d.tailPos)
+				}
 			return true
 		}
 
@@ -202,6 +199,16 @@ func (d *DoubleArrayTrie) Add(key string) bool {
 	return false
 
 }
+
+// Update base and check by separating the first char of slice
+func (d *DoubleArrayTrie) separate(slice string, idx int, s int, tailPos int) {
+	checkPos := d.getBase(s) + ValueFromChar(int(slice[idx]))
+
+	d.setCheck(checkPos, s)
+	d.setBase(checkPos, -tailPos)
+	d.WriteTail(slice[idx + 1:] + boundary, tailPos)
+}
+
 
 // Insert key into tail starting at tailPos
 func (d *DoubleArrayTrie) tailInsert(s int, key string)  {
@@ -252,8 +259,8 @@ func (d *DoubleArrayTrie) tailInsert(s int, key string)  {
 	list[1] = int(key[length])
 	d.setBase(s, d.xCheck(list))
 
-	d.separate(d.tail[length:],s ,oldTailPos)
-	d.separate(key[length:], s, d.tailPos)
+	d.separate(d.tail, length,s ,oldTailPos)
+	d.separate(key, length, s, d.tailPos)
 }
 
 // Find max consecutive entries such as
@@ -303,15 +310,6 @@ func (d *DoubleArrayTrie) xCheck(list []int) int {
 	}
 
 	return basePos
-}
-
-// Update base and check by separating the first char of slice
-func (d *DoubleArrayTrie) separate(slice string, s int, tailPos int) {
-	checkPos := d.getBase(s) + ValueFromChar(int(slice[0]))
-
-	d.setCheck(checkPos, s)
-	d.setBase(checkPos, -tailPos)
-	d.WriteTail(slice, tailPos)
 }
 
 
