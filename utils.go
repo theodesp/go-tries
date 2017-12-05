@@ -58,11 +58,19 @@ func growSlice(slice []int, newCap int) []int {
 // Ensures slice pos is reachable by growing the slice capacity
 func EnsureIndex(s[]int, pos int) []int  {
 	for {
-		if pos > cap(s) {
+		if pos + 1 > cap(s) {
 			s = growSlice(s, cap(s) + growInc)
 		} else {
 			break
 		}
 	}
 	return s
+}
+
+func ValueFromChar(code int) int  {
+	return code - 'a' + 1
+}
+
+func ValueToChar(code int) int  {
+	return code + 'a'  - 1
 }

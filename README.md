@@ -35,12 +35,17 @@ Based on the [Sato and Morimoto paper](http://citeseerx.ist.psu.edu/viewdoc/down
 
 Benchmarks
 ---
-Single threaded benchmarks
+Single threaded benchmarks: Simple Trie
 ```bash
 BenchmarkSimpleTriePutStringKey-4       50000000                35.6 ns/op             8 B/op          1 allocs/op
 BenchmarkSimpleTrieGetStringKey-4       100000000               16.0 ns/op             0 B/op          0 allocs/op
 BenchmarkSimpleTriePutPhraseKey-4       20000000                69.5 ns/op             8 B/op          1 allocs/op
 BenchmarkSimpleTrieGetPhraseKey-4       30000000                42.1 ns/op             0 B/op          0 allocs/op
+```
+
+Single threaded benchmarks: Double Array Trie
+```bash
+BenchmarkDoubleArrayTrieGetSimpleStringKey-4    50000000                26.7 ns/op             0 B/op          0 allocs/op
 ```
 
 License

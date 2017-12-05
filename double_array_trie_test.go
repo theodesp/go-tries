@@ -2,14 +2,13 @@ package go_tries
 
 import (
 	"testing"
-	"fmt"
 )
 
 func TestInitTail(t *testing.T) {
 	d := NewDoubleArrayTrie()
 
-	if d.tail != "#" {
-		t.Errorf("expected tail initial value to be %v, got %v", "#", d.tail)
+	if d.tail != "" {
+		t.Errorf("expected tail initial value to be %v, got %v", "", d.tail)
 	}
 }
 
@@ -52,7 +51,7 @@ func TestReadTailZeroIndex(t *testing.T) {
 func TestWriteTailInitial(t *testing.T) {
 	d := NewDoubleArrayTrie()
 
-	d.WriteTail("hello#", 0)
+	d.WriteTail("hello#", d.tailPos)
 
 	if d.tail != "hello#" {
 		t.Errorf("expected tail array value to be %v, got %v", "hello#", d.tail)
@@ -62,8 +61,8 @@ func TestWriteTailInitial(t *testing.T) {
 func TestWriteTailNoOverlapping(t *testing.T) {
 	d := NewDoubleArrayTrie()
 
-	d.WriteTail("hello#", 0)
-	d.WriteTail("world#", 6)
+	d.WriteTail("hello#", 1)
+	d.WriteTail("world#", 7)
 
 	if d.tail != "hello#world#" {
 		t.Errorf("expected tail array value to be %v, got %v", "hello#world#", d.tail)
@@ -73,34 +72,26 @@ func TestWriteTailNoOverlapping(t *testing.T) {
 func TestWriteTailOverlapping(t *testing.T) {
 	d := NewDoubleArrayTrie()
 
-	d.WriteTail("hello#", 0)
+	d.WriteTail("hello#", 1)
 	d.WriteTail("world#", 3)
 
-	if d.tail != "helworld#" {
-		t.Errorf("expected tail array value to be %v, got %v", "helworld#", d.tail)
+	if d.tail != "heworld#" {
+		t.Errorf("expected tail array value to be %v, got %v", "heworld#", d.tail)
 	}
 }
 
 func TestGetKeyExistsInTrie(t *testing.T) {
 	d := NewDoubleArrayTrie()
-	d.setCheck(3, 1)
-	d.setBase(3, 1)
-	d.setCheck(2, 3)
-	d.setBase(2, -1)
-	d.WriteTail("aby#", 0)
+	d.Add("baby")
 
 	if d.Get("baby") != true {
-		t.Errorf("expected search for key %v to be %v, got %v", "babe", true, false)
+		t.Errorf("expected search for key %v to be %v, got %v", "baby", true, false)
 	}
 }
 
 func TestGetKeyDeleteInTrie(t *testing.T) {
 	d := NewDoubleArrayTrie()
-	d.setCheck(3, 1)
-	d.setBase(3, 1)
-	d.setCheck(2, 3)
-	d.setBase(2, -1)
-	d.WriteTail("aby#", 0)
+	d.Add("baby")
 
 	if d.Delete("baby") != true {
 		t.Errorf("expected delete for key %v to be %v, got %v", "babe", true, false)
@@ -111,17 +102,109 @@ func TestGetKeyDeleteInTrie(t *testing.T) {
 	}
 }
 
-func BenchmarkDoubleArrayTrieGetStringKey(b *testing.B) {
+func TestFindArcsInTrieSimple(t *testing.T) {
 	d := NewDoubleArrayTrie()
-
-	words := [...]string{
-		"hello", "baby", "how", "are", "you", "babe"}
-
 	d.setCheck(3, 1)
 	d.setBase(3, 1)
 	d.setCheck(2, 3)
 	d.setBase(2, -1)
-	d.WriteTail("aby#", 0)
+	d.WriteTail("aby#", 1)
+
+	if d.findArcs(3) != "a" {
+		t.Errorf("expected findArcs for pos %v to be %v, got %v", 3, "a", d.findArcs(3))
+	}
+}
+
+func TestFindArcsInTrieMultiple(t *testing.T) {
+	d := NewDoubleArrayTrie()
+
+	d.setBase(1, 1)
+	d.setBase(2, 1)
+	d.setBase(3, -1)
+	d.setBase(4, -12)
+	d.setBase(10, -9)
+
+	d.setCheck(1, 3)
+	d.setCheck(2, 1)
+	d.setCheck(3, 2)
+	d.setCheck(4, 2)
+	d.setCheck(10, 1)
+
+	if d.findArcs(2) != "bc" {
+		t.Errorf("expected findArcs for pos %v to be %v, got %v", 2, "bc", d.findArcs(2))
+	}
+}
+
+func TestXCheckInTrie(t *testing.T) {
+	d := NewDoubleArrayTrie()
+
+	d.setCheck(1, 3)
+	d.setCheck(2, 1)
+	d.setCheck(3, 2)
+	d.setCheck(4, 2)
+	d.setCheck(10, 1)
+
+	if d.xCheck([]int{1}) != 4 {
+		t.Errorf("expected xCheck for list %v to be %v, got %v", []int{1}, 4, d.xCheck([]int{1}))
+	}
+}
+
+func TestXCheckInTrieMultipleNoMatch(t *testing.T) {
+	d := NewDoubleArrayTrie()
+
+	d.setCheck(1, 3)
+	d.setCheck(2, 1)
+	d.setCheck(10, 1)
+
+	if d.xCheck([]int{2, 10}) != 1 {
+		t.Errorf("expected xCheck for list %v to be %v, got %v", []int{2, 10}, 1, d.xCheck([]int{2, 10}))
+	}
+}
+
+func TestXCheckInTrieMultipleWithMatch(t *testing.T) {
+	d := NewDoubleArrayTrie()
+
+	d.setCheck(1, 3)
+	d.setCheck(2, 1)
+	d.setCheck(3, 2)
+	d.setCheck(4, 2)
+	d.setCheck(10, 1)
+
+	if d.xCheck([]int{2, 10}) != 3 {
+		t.Errorf("expected xCheck for list %v to be %v, got %v", []int{2, 10}, 3, d.xCheck([]int{2, 10}))
+	}
+}
+
+func TestXAddInTrieEmpty(t *testing.T) {
+	d := NewDoubleArrayTrie()
+
+	d.Add("bachelor")
+	d.Add("jar")
+
+	if d.tail != "achelor#ar#" {
+		t.Errorf("expected tail to be %v, got %v", "achelor#ar#", d.tail)
+	}
+
+	if d.tailPos != 12 {
+		t.Errorf("expected tailPos to be %v, got %v", 12, d.tailPos)
+	}
+
+	if d.getBase(3) != -1 {
+		t.Errorf("expected getBase for pos %v to be %v, got %v", 3, -1, d.getBase(3))
+	}
+
+	if d.getCheck(3) != 1 {
+		t.Errorf("expected getCheck for pos %v to be %v, got %v", 3, 1, d.getCheck(3))
+	}
+}
+
+func BenchmarkDoubleArrayTrieGetSimpleStringKey(b *testing.B) {
+	d := NewDoubleArrayTrie()
+
+	words := [...]string{"hellohasdhwd ed  qqdwd", "baby", "are", "you", "today"}
+	for _, word := range words {
+		d.Add(word)
+	}
 
 	b.ResetTimer()
 	b.ReportAllocs()
