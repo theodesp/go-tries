@@ -59,9 +59,17 @@ func (d *DoubleArrayTrie) setCheck(pos int, node int) {
 
 // Read tail starting at pos and ending in a boundary rune
 func (d *DoubleArrayTrie) ReadTail(pos int) string {
-	i := strings.Index(d.tail[pos:], boundary)
+	if pos < 1 {
+		panic("Unexpected position parameter for ReadTail")
+	}
+
+	if d.tail == "" {
+		return ""
+	}
+
+	i := strings.Index(d.tail[pos-1:], boundary)
 	if i != -1 && pos != i {
-		return d.tail[:i+1]
+		return d.tail[pos-1:pos+i-1]
 	} else {
 		return ""
 	}
@@ -69,12 +77,21 @@ func (d *DoubleArrayTrie) ReadTail(pos int) string {
 
 // Write at tail a text string starting at pos
 func (d *DoubleArrayTrie) WriteTail(text string, pos int) {
-	if pos == 0 {
+	if pos < 1 {
 		panic("Unexpected position parameter for WriteTail")
 	}
-	d.tail = d.tail[:pos-1]
-	d.tail = d.tail + text
-	d.tailPos = len(d.tail) + 1
+
+	// We were asked to just append the text to the end of tail
+	if len(d.tail) == 0 || len(d.tail) <= pos {
+		d.tail = d.tail + text
+	} else {
+		// We were asked to just append the text to the ena of tail starting from pos
+		d.tail = d.tail[:pos-1] + text
+	}
+
+	if len(d.tail) > d.tailPos {
+		d.tailPos = len(d.tail) + 1
+	}
 }
 
 // NewDoubleArrayTrie allocates and returns a new *DoubleArrayTrie.
@@ -192,7 +209,7 @@ func (d *DoubleArrayTrie) Add(key string) bool {
 		return true
 	} else {
 		if d.getBase(t) != 0 {
-			d.tailInsert(t, key)
+			d.tailInsert(t, key[idx + 1:])
 		}
 	}
 
@@ -204,8 +221,8 @@ func (d *DoubleArrayTrie) Add(key string) bool {
 func (d *DoubleArrayTrie) separate(slice string, idx int, s int, tailPos int) {
 	checkPos := d.getBase(s) + ValueFromChar(int(slice[idx]))
 
-	d.setCheck(checkPos, s)
 	d.setBase(checkPos, -tailPos)
+	d.setCheck(checkPos, s)
 	d.WriteTail(slice[idx + 1:] + boundary, tailPos)
 }
 
@@ -219,7 +236,6 @@ func (d *DoubleArrayTrie) tailInsert(s int, key string)  {
 	var list = []int{0, 0}
 	idx := 0
 	length := 0
-	t := 0
 
 	// Find length of common chars in tail
 	for {
@@ -237,30 +253,34 @@ func (d *DoubleArrayTrie) tailInsert(s int, key string)  {
 	// Appends a sequence of arcs for the longest prefix
 	for {
 		// We have reached the end. Break now.
-		if idx > length {
+		if idx >= length {
 			break
 		}
 		// For each different character
 		ch := d.tail[idx]
 
-		list[0] = int(ch)
+		list[0] = ValueFromChar(int(ch))
 		// find next available place for common conflict at ch
 		d.setBase(s, d.xCheck(list))
-		// calculate next check origin
-		t -= d.getBase(s + list[0])
 		// Update check to point to base that was originated from
-		d.setCheck(t, s)
-		s = t
+		d.setCheck(d.getBase(s) + list[0], s)
 
+		s = d.getBase(s) + list[0]
 		idx += 1
 	}
-
-	list[0] = int(d.tail[length])
-	list[1] = int(key[length])
+	list[0] = ValueFromChar(int(d.tail[length]))
+	list[1] = ValueFromChar(int(key[length]))
 	d.setBase(s, d.xCheck(list))
 
-	d.separate(d.tail, length,s ,oldTailPos)
-	d.separate(key, length, s, d.tailPos)
+	q := d.getBase(s) + list[0]
+	d.setBase(q, -oldTailPos)
+	d.setCheck(q, s)
+	d.WriteTail(d.tail, oldTailPos)
+
+	q = d.getBase(s) + list[1]
+	d.setBase(q, -d.tailPos)
+	d.setCheck(q, s)
+	d.WriteTail(key + boundary, d.tailPos)
 }
 
 // Find max consecutive entries such as
@@ -314,13 +334,11 @@ func (d *DoubleArrayTrie) xCheck(list []int) int {
 
 
 func (d *DoubleArrayTrie) findTailPos(key string) (int, int) {
-	idx := -1
+	idx := 0
 	s := 1
 	var t int
 
 	for {
-		idx += 1
-
 		ch := ValueFromChar(int(key[idx]))
 		t = d.getBase(s) + ch
 
@@ -337,6 +355,7 @@ func (d *DoubleArrayTrie) findTailPos(key string) (int, int) {
 
 		// next word index
 		s = t
+		idx += 1
 	}
 
 	return idx, t

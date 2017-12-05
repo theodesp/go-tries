@@ -43,8 +43,37 @@ func TestGetSetCheck(t *testing.T) {
 func TestReadTailZeroIndex(t *testing.T) {
 	d := NewDoubleArrayTrie()
 
-	if d.ReadTail(0) != "" {
-		t.Errorf("expected tail array value at 0 to be %v, got %v", "", d.ReadTail(0))
+	if d.ReadTail(1) != "" {
+		t.Errorf("expected tail array value at 0 to be %v, got %v", "", d.ReadTail(1))
+	}
+}
+
+func TestReadTailNonZeroIndex(t *testing.T) {
+	d := NewDoubleArrayTrie()
+
+	if d.ReadTail(2) != "" {
+		t.Errorf("expected tail array value at 0 to be %v, got %v", "", d.ReadTail(1))
+	}
+}
+
+func TestReadTailNonZeroTail(t *testing.T) {
+	d := NewDoubleArrayTrie()
+
+	d.WriteTail("Hello#", 1)
+
+	if d.ReadTail(1) != "Hello" {
+		t.Errorf("expected tail array value at 0 to be %v, got %v", "Hello", d.ReadTail(1))
+	}
+}
+
+func TestReadTailNonZeroTailMultiple(t *testing.T) {
+	d := NewDoubleArrayTrie()
+
+	d.WriteTail("Hello#", 1)
+	d.WriteTail("World#", 7)
+
+	if d.ReadTail(7) != "World" {
+		t.Errorf("expected tail array value starting at 7 to be %v, got %v", "World", d.ReadTail(7))
 	}
 }
 
@@ -186,7 +215,7 @@ func TestXAddInTrieEmpty(t *testing.T) {
 	}
 
 	if d.tailPos != 12 {
-		t.Errorf("expected tailPos to be %v, got %v", 12, d.tailPos)
+		t.Errorf("expected tailPos to be %v, got %v", 11, d.tailPos)
 	}
 
 	if d.getBase(3) != -1 {
@@ -195,6 +224,42 @@ func TestXAddInTrieEmpty(t *testing.T) {
 
 	if d.getCheck(3) != 1 {
 		t.Errorf("expected getCheck for pos %v to be %v, got %v", 3, 1, d.getCheck(3))
+	}
+}
+
+
+func TestXAddInTrieWithNoCommonPrefix(t *testing.T) {
+	d := NewDoubleArrayTrie()
+
+	d.Add("bachelor")
+	d.Add("jar")
+
+	if d.Get("bachelor") != true {
+		t.Errorf("expected Get for % to be %v, got %v", "bachelor", true, d.Get("bachelor"))
+	}
+
+	if d.Get("jar") != true {
+		t.Errorf("expected Get for % to be %v, got %v", "jar", true, d.Get("jar"))
+	}
+}
+
+func TestXAddInTrieWithCommonPrefix(t *testing.T) {
+	d := NewDoubleArrayTrie()
+
+	d.Add("bachelor")
+	d.Add("jar")
+	d.Add("badge")
+
+	if d.Get("bachelor") != true {
+		t.Errorf("expected Get for % to be %v, got %v", "bachelor", true, d.Get("bachelor"))
+	}
+
+	if d.Get("jar") != true {
+		t.Errorf("expected Get for % to be %v, got %v", "jar", true, d.Get("jar"))
+	}
+
+	if d.Get("badge") != true {
+		t.Errorf("expected Get for % to be %v, got %v", "badge", true, d.Get("badge"))
 	}
 }
 
