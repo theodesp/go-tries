@@ -104,8 +104,8 @@ func TestWriteTailOverlapping(t *testing.T) {
 	d.WriteTail("hello#", 1)
 	d.WriteTail("world#", 3)
 
-	if d.tail != "heworld#" {
-		t.Errorf("expected tail array value to be %v, got %v", "heworld#", d.tail)
+	if d.tail != "held#o#" {
+		t.Errorf("expected tail array value to be %v, got %v", "held#o#", d.tail)
 	}
 }
 

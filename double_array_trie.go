@@ -82,11 +82,20 @@ func (d *DoubleArrayTrie) WriteTail(text string, pos int) {
 	}
 
 	// We were asked to just append the text to the end of tail
-	if len(d.tail) == 0 || len(d.tail) <= pos {
+	if len(d.tail) == 0 || d.tailPos == pos {
 		d.tail = d.tail + text
 	} else {
-		// We were asked to just append the text to the ena of tail starting from pos
-		d.tail = d.tail[:pos-1] + text
+		var buffer bytes.Buffer
+		for i := pos; i< len(text); i+=1 {
+			buffer.WriteString(string(text[i]))
+
+			if string(text[i]) == boundary {
+				break
+			}
+		}
+		str := buffer.String()
+
+		d.tail = d.tail[:pos-1] + str + d.tail[d.tailPos - len(str):]
 	}
 
 	if len(d.tail) > d.tailPos {
@@ -116,9 +125,10 @@ func (d *DoubleArrayTrie) Get(key string) bool {
 	// We still have to read the rest from the tail
 	// compare it with the rest of the string
 	if idx < len(key) {
-		rest := d.ReadTail(-d.getBase(t))
+		restPos := -d.getBase(t)
+		rest := d.ReadTail(restPos)
 
-		if rest == key[idx+1:] {
+		if rest == key[idx + 1:] {
 			return true
 		} else {
 			return false
@@ -146,7 +156,7 @@ func (d *DoubleArrayTrie) Delete(key string) bool {
 	if idx < len(key) {
 		rest := d.ReadTail(-d.getBase(t))
 
-		if rest == key[idx+1:] {
+		if rest == key[idx + 1:] {
 			// Clear out base and check
 			d.setBase(t, 0)
 			d.setCheck(t, 0)
@@ -275,12 +285,12 @@ func (d *DoubleArrayTrie) tailInsert(s int, key string)  {
 	q := d.getBase(s) + list[0]
 	d.setBase(q, -oldTailPos)
 	d.setCheck(q, s)
-	d.WriteTail(d.tail, oldTailPos)
+	d.WriteTail(d.tail[length:], oldTailPos)
 
 	q = d.getBase(s) + list[1]
 	d.setBase(q, -d.tailPos)
 	d.setCheck(q, s)
-	d.WriteTail(key + boundary, d.tailPos)
+	d.WriteTail(key[length + 1:] + boundary, d.tailPos)
 }
 
 // Find max consecutive entries such as
@@ -334,11 +344,16 @@ func (d *DoubleArrayTrie) xCheck(list []int) int {
 
 
 func (d *DoubleArrayTrie) findTailPos(key string) (int, int) {
-	idx := 0
+	idx := -1
 	s := 1
 	var t int
 
 	for {
+		idx += 1
+		if idx >= len(key) {
+			break
+		}
+
 		ch := ValueFromChar(int(key[idx]))
 		t = d.getBase(s) + ch
 
@@ -355,7 +370,6 @@ func (d *DoubleArrayTrie) findTailPos(key string) (int, int) {
 
 		// next word index
 		s = t
-		idx += 1
 	}
 
 	return idx, t
