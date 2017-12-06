@@ -270,7 +270,7 @@ func TestXAddInTrieWithCommonPrefix(t *testing.T) {
 func BenchmarkDoubleArrayTrieGetSimpleStringKey(b *testing.B) {
 	d := NewDoubleArrayTrie()
 
-	words := [...]string{"hellohasdhwd ed  qqdwd", "baby", "are", "you", "today"}
+	words := [...]string{"hellohasdhwd ed  qqdwd", "baby", "are", "you", "today", "babe", "hare", "hake", "sake"}
 	for _, word := range words {
 		d.Add(word)
 	}
