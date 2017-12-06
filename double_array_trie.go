@@ -185,7 +185,7 @@ func (d *DoubleArrayTrie) Add(key string) bool {
 		if d.getCheck(t) != s {
 			// Case when we have a conflict and we have to relocate the base
 			if d.getCheck(t) != 0 {
-				//d.relocateBase(s, t, key, idx)
+				d.relocateBase(s, t, key, idx)
 			} else {
 				// Case 1. Empty string or without conflicts. Just insert at tail
 				d.separate(key, idx, s, d.tailPos)
@@ -234,6 +234,73 @@ func (d *DoubleArrayTrie) separate(slice string, idx int, s int, tailPos int) {
 	d.setBase(checkPos, -tailPos)
 	d.setCheck(checkPos, s)
 	d.WriteTail(slice[idx + 1:] + boundary, tailPos)
+}
+
+// Update base to cater multiple conflicts
+func (d *DoubleArrayTrie) relocateBase(s int, t int, slice string, idx int) {
+	temp1 := s
+	var temp2 int
+	var oldCheck int
+	var list []int
+
+	// Find concecutive arcs for s and t nodes
+	list1 := d.findArcs(s)
+	list2 := d.findArcs(d.getCheck(t))
+
+	// Find bigger list and node. Small optimization.
+	if len(list1) + 1 < len(list2) {
+		oldCheck = s
+		list = list1
+	} else {
+		oldCheck = d.getCheck(t)
+		list = list2
+	}
+
+	// save old tail pos
+	oldTailPos := d.getBase(oldCheck)
+	d.setBase(oldCheck, d.xCheck(list))
+
+	i := -1
+
+	for {
+		i += 1
+
+		// We only do list.length iterations == number of max consecutive conflicts we need to resolve
+		if i > len(list) {
+			break
+		}
+
+		// Calculate check and base and update them
+		temp1 = oldTailPos + list[i]
+		temp2 = d.getBase(oldCheck) + list[i]
+
+		d.setBase(temp2, d.getBase(temp1))
+		d.setCheck(temp2, oldCheck)
+
+		if d.getBase(temp1) > 0 {
+			// find min offset w from the check array and update them to point to the correct parents
+			w := 1
+
+			for {
+				if w >= len(d.check) {
+					break
+				}
+				ch := d.getBase(temp1) + w
+
+				// Update new check to point to the corect parent
+				if d.getCheck(ch) == temp1 {
+					d.setCheck(ch, temp2)
+				}
+			}
+		}
+	}
+
+	// Negate old base and check
+	d.setBase(temp1, 0)
+	d.setCheck(temp2, 0)
+
+	// Update new base and check
+	d.separate(slice, idx, temp2, d.tailPos)
 }
 
 
@@ -287,17 +354,14 @@ func (d *DoubleArrayTrie) tailInsert(s int, key string)  {
 	d.setCheck(q, s)
 	d.WriteTail(d.tail[length:], oldTailPos)
 
-	q = d.getBase(s) + list[1]
-	d.setBase(q, -d.tailPos)
-	d.setCheck(q, s)
-	d.WriteTail(key[length + 1:] + boundary, d.tailPos)
+	d.separate(key, length, s, d.tailPos)
 }
 
 // Find max consecutive entries such as
 // CHECK(BASE(s) + i) == s
-func (d *DoubleArrayTrie) findArcs(s int) string {
+func (d *DoubleArrayTrie) findArcs(s int) []int {
 	listLength := maxCode - minCode + 1
-	var result bytes.Buffer
+	var result []int
 	i := minCode - 1
 	var t int
 
@@ -309,11 +373,11 @@ func (d *DoubleArrayTrie) findArcs(s int) string {
 		t = d.getBase(s) + i
 		c := d.getCheck(t)
 		if c == s {
-			result.WriteString(string(ValueToChar(i)))
+			result = append(result, i)
 		}
 	}
 
-	return result.String()
+	return result
 }
 
 // Find minimum available q number such as CHECK(basePos + list[c]) !== 0

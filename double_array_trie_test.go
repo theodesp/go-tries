@@ -139,8 +139,8 @@ func TestFindArcsInTrieSimple(t *testing.T) {
 	d.setBase(2, -1)
 	d.WriteTail("aby#", 1)
 
-	if d.findArcs(3) != "a" {
-		t.Errorf("expected findArcs for pos %v to be %v, got %v", 3, "a", d.findArcs(3))
+	if d.findArcs(3)[0] != 1 {
+		t.Errorf("expected findArcs for pos %v to be %v, got %v", 3, 1, d.findArcs(3)[0])
 	}
 }
 
@@ -159,8 +159,12 @@ func TestFindArcsInTrieMultiple(t *testing.T) {
 	d.setCheck(4, 2)
 	d.setCheck(10, 1)
 
-	if d.findArcs(2) != "bc" {
-		t.Errorf("expected findArcs for pos %v to be %v, got %v", 2, "bc", d.findArcs(2))
+	if d.findArcs(2)[0] != 2 {
+		t.Errorf("expected findArcs first value for pos %v to be %v, got %v", 2, 2, d.findArcs(2)[0])
+	}
+
+	if d.findArcs(2)[1] != 3 {
+		t.Errorf("expected findArcs second value for pos %v to be %v, got %v", 2, 3, d.findArcs(2)[1])
 	}
 }
 
